@@ -104,3 +104,131 @@ body {
         padding: 8px 0;
     }
 }
+
+/* Estilos específicos para o dashboard_cliente.php */
+
+/* Modal de Gerenciar Consulta */
+#consultaModal .modal-header {
+    border-radius: 10px 10px 0 0;
+    padding: 20px;
+}
+
+#consultaModal .modal-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+#consultaModal .modal-body {
+    padding: 25px;
+}
+
+#consultaModal .table {
+    margin-bottom: 0;
+}
+
+#consultaModal .table th {
+    background-color: blue;
+    color: white;
+    font-weight: 600;
+    padding: 12px;
+}
+
+#consultaModal .table td {
+    padding: 12px;
+    vertical-align: middle;
+}
+
+#consultaModal .card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+#consultaModal .card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#consultaModal .card-body {
+    padding: 20px;
+}
+
+#consultaModal .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+#consultaModal .form-label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 8px;
+}
+
+#consultaModal .form-control {
+    padding: 10px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+#consultaModal .form-control:focus {
+    border-color: blue;
+    box-shadow: 0 0 0 0.2rem rgba(0, 0, 255, 0.25);
+}
+
+#consultaModal .btn-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #000;
+    font-weight: 600;
+    padding: 10px 20px;
+}
+
+#consultaModal .btn-warning:hover {
+    background-color: #e0a800;
+    border-color: #e0a800;
+    transform: translateY(-1px);
+}
+
+#consultaModal .btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    font-weight: 600;
+    padding: 10px 20px;
+}
+
+#consultaModal .btn-danger:hover {
+    background-color: #c82333;
+    border-color: #c82333;
+    transform: translateY(-1px);
+}
+
+#consultaModal .modal-footer {
+    border-top: 1px solid #e0e0e0;
+    padding: 20px 25px;
+}
+
+#consultaModal .border-top {
+    border-top: 2px solid #f8f9fa !important;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    #consultaModal .modal-body {
+        padding: 20px;
+    }
+    
+    #consultaModal .card-body {
+        padding: 15px;
+    }
+    
+    #consultaModal .row {
+        margin-bottom: 0;
+    }
+    
+    #consultaModal .col-md-6 {
+        margin-bottom: 15px;
+    }
+}

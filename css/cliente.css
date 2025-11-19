@@ -60,11 +60,11 @@
     color: #333;
     font-size: 15px;
 }
+.table td
 
 .table th, .table td {
     border: 1px solid #dce3eb;
 }
-
 /* Botões */
 .btn {
     border: none;

@@ -16,8 +16,6 @@
         <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,400;1,400&amp;display=swap" rel="stylesheet" />
         <!-- Core theme CSS (includes Bootstrap)-->
         <link href="css/styles.css" rel="stylesheet" />
-        <link href="css/login.css" rel="stylesheet" />
-        <link href="css/sobre.css" rel="stylesheet" />
         <link href="css/cliente.css" rel="stylesheet" />
     </head>
     <body id="page-top">
@@ -32,6 +30,7 @@
                 <div class="collapse navbar-collapse" id="navbarResponsive">
                     <ul class="navbar-nav ms-auto me-4 my-3 my-lg-0">
                         <li class="nav-item"><a class="nav-link me-lg-3" href="dashboard_adm.php">Home</a></li>
+                        <li class="nav-item"><a class="nav-link me-lg-3" href="funcionarios.php">Funcionários</a></li>
                         <li class="nav-item"><a class="nav-link me-lg-3" href="cliente.php">Clientes</a></li>
                     </ul>
                     <a href="index.php" class="btn btn-primary rounded-pill px-3 mb-2 mb-lg-0">
