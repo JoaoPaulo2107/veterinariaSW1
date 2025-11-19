@@ -1,229 +1,265 @@
 <?php
-include 'includes/header_adm.php';
 session_start();
+require_once __DIR__ . '/includes/conexao.php';
 
-// Verifica se usuário está logado
 if (!isset($_SESSION['usuario_id'], $_SESSION['usuario_email'])) {
-    // não logado
-    header('Location: index.php'); // ajuste caminho para sua página de login
+    header('Location: index.php');
     exit;
 }
 
-// opcional: usuario logado. Pode usar $_SESSION['usuario_nome'] etc.
+include 'includes/header_adm.php';
 ?>
+
 <main>
     <section class="py-5">
         <div class="container px-5">
             <div class="row gx-5">
                 <div class="col-12">
                     <h2 class="display-6 mb-4">Funcionários</h2>
+
                     <div class="table-responsive">
-                        <table class="table table-striped table-hover"
-                            style="border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 255, 0.1); overflow: hidden; border-collapse: collapse;">
-                            <thead class="table" style="background-color:blue; color: white;">
+                        <table class="table table-striped table-hover" style="border-radius:10px; box-shadow:0 0 10px rgba(0,0,255,0.1);">
+                            <thead class="table" style="background-color:blue; color:white;">
                                 <tr>
-                                    <!-- cabeçalho -->
-                                    <th scope="col">NOME</th>
-                                    <th scope="col">CPF</th>
-                                    <th scope="col">DATA DE NASCIMENTO</th>
-                                    <th scope="col">SEXO</th>
-                                    <th scope="col">CRMV</th>
-                                    <th scope="col">EMAIL</th>
-                                    <th scope="col">TELEFONE</th>
-                                    <th scope="col">ESPECIALIDADE</th>
-                                    <th scope="col">EDITAR</th>
+                                    <th>NOME</th>
+                                    <th>CPF</th>
+                                    <th>DATA NASC.</th>
+                                    <th>SEXO</th>
+                                    <th>CRMV</th>
+                                    <th>EMAIL</th>
+                                    <th>TELEFONE</th>
+                                    <th>ESPECIALIDADE</th>
+                                    <th>EDITAR</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <!-- dados -->
-                                    <td>Evellyn dos Santos Furtado</td>
-                                    <td>563.475.485-60</td>
-                                    <td>25/09/2008</td>
-                                    <td>Feminino</td>
-                                    <td>11111</td>
-                                    <td>evellynfurtado100@gmail.com</td>
-                                    <td>118585-5855</td>
-                                    <td>Banho e Tosa</td>
-                                    <td>
-                                        <!-- botão para ir ao modal de editar funcionário -->
-                                        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#EditarModal">Editar</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <!-- dados -->
-                                    <td>Evellyn dos Santos Furtado</td>
-                                    <td>563.475.485-60</td>
-                                    <td>25/09/2008</td>
-                                    <td>Feminino</td>
-                                    <td>11111</td>
-                                    <td>evellynfurtado100@gmail.com</td>
-                                    <td>118585-5855</td>
-                                    <td>Banho e Tosa</td>
-                                    <td>
-                                        <!-- botão para ir ao modal de editar funcionário -->
-                                        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#EditarModal">Editar</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <!-- dados -->
-                                    <td>Evellyn dos Santos Furtado</td>
-                                    <td>563.475.485-60</td>
-                                    <td>25/09/2008</td>
-                                    <td>Feminino</td>
-                                    <td>11111</td>
-                                    <td>evellynfurtado100@gmail.com</td>
-                                    <td>118585-5855</td>
-                                    <td>Banho e Tosa</td>
-                                    <td>
-                                         <!-- botão para ir ao modal de editar funcionário -->
-                                        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#EditarModal">Editar</button>
-                                    </td>
-                                </tr>
+
+<?php
+$sql = "SELECT * FROM Funcionario ORDER BY Nome ASC";
+$stmt = $pdo->prepare($sql);
+$stmt->execute();
+$dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+if (!$dados) {
+    echo '<tr><td colspan="9" class="text-center">Nenhum funcionário cadastrado.</td></tr>';
+} else {
+    foreach ($dados as $f) {
+        echo "
+        <tr>
+            <td>{$f['Nome']}</td>
+            <td>{$f['CPF']}</td>
+            <td>" . date('d/m/Y', strtotime($f['Data_Nascimento'])) . "</td>
+            <td>{$f['Sexo']}</td>
+            <td>{$f['CRMV']}</td>
+            <td>{$f['Email']}</td>
+            <td>{$f['Telefone']}</td>
+            <td>{$f['Especialidade']}</td>
+            <td>
+                <button class='btn btn-warning'
+                    data-bs-toggle='modal'
+                    data-bs-target='#editarModal'
+                    data-id='{$f['ID_veterinario']}'
+                    data-cpf='{$f['CPF']}'
+                    data-nome='{$f['Nome']}'
+                    data-sexo='{$f['Sexo']}'
+                    data-email='{$f['Email']}'
+                    data-telefone='{$f['Telefone']}'
+                    data-crmv='{$f['CRMV']}'
+                    data-especialidade='{$f['Especialidade']}'
+                    data-data='{$f['Data_Nascimento']}'>
+                    Editar
+                </button>
+            </td>
+        </tr>";
+    }
+}
+?>
+
                             </tbody>
                         </table>
                     </div>
+
                     <div class="text-center mt-4">
-                        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#infoModal" style="background-color: blue;">Cadastrar Funcionário</button>
+                        <button class="btn btn-secondary" style="background-color:blue;" data-bs-toggle="modal" data-bs-target="#cadModal">
+                            Cadastrar Funcionário
+                        </button>
                     </div>
+
                 </div>
             </div>
         </div>
     </section>
-
-    <!-- Modal Cadastro-->
-    <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header" style="background-color:blue">
-                    <h5 class="modal-title" id="infoModalLabel" style="color:white;">Cadastrar Funcionário</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- FORMULÁRIO PARA CADASTRAR O FUNCIONÁRIO -->
-                    <form>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Nome Completo</label>
-                                <input type="text" class="form-control" placeholder="Digite o nome completo">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">CPF</label>
-                                <input type="text" class="form-control" placeholder="000.000.000-00">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Data de Nascimento</label>
-                                <input type="date" class="form-control">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Sexo</label>
-                                <select class="form-control">
-                                    <option>Masculino</option>
-                                    <option>Feminino</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">CRMV</label>
-                                <input type="number" class="form-control" placeholder="000000">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Email</label>
-                                <input type="email" class="form-control" placeholder="xxxxxxxgmail.com">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Telefone</label>
-                                <input type="number" class="form-control" placeholder="00000-0000">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Especialidade</label>
-                                <input type="text" class="form-control" placeholder="Veterinario..">
-                            </div>
-                        </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success">Cadastrar</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                    style="background-color:blue;">Cancelar</button>
-            </div>
-        </div>
-    </div>
-    </div>
-
-    <!-- Modal Editar-->
-    <div class="modal fade" id="EditarModal" tabindex="-1" aria-labelledby="editarModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header" style="background-color:blue">
-                    <h5 class="modal-title" id="iModalLabel" style="color:white;">Editar dados do Funcionário</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- FORMULÁRIO PARA EDITAR DADOS  DO FUNCIONÁRIO -->
-                    <form>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Nome Completo</label>
-                                <input type="text" class="form-control" placeholder="Digite o nome completo">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">CPF</label>
-                                <input type="text" class="form-control" placeholder="000.000.000-00">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Data de Nascimento</label>
-                                <input type="date" class="form-control">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Sexo</label>
-                                <select class="form-control">
-                                    <option>Masculino</option>
-                                    <option>Feminino</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">CRMV</label>
-                                <input type="number" class="form-control" placeholder="000000">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Email</label>
-                                <input type="email" class="form-control" placeholder="xxxxxxxgmail.com">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Telefone</label>
-                                <input type="number" class="form-control" placeholder="00000-0000">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Especialidade</label>
-                                <input type="text" class="form-control" placeholder="Veterinario..">
-                            </div>
-                        </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success">Atualizar</button>
-                <button type="button" class="btn btn-success" style="background-color:red">Excluir</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="background-color:blue;">Cancelar</button>
-            </div>
-        </div>
-    </div>
-    </div>
 </main>
 
-<?php
-include 'includes/footer.php';
-?>
+<!-- Modal de Cadastro -->
+<div class="modal fade" id="cadModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color:blue;">
+                <h5 class="modal-title" style="color:white;">Cadastrar Funcionário</h5>
+                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form action="salvar_funcionario.php" method="POST">
+                <div class="modal-body">
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label>Nome</label>
+                            <input type="text" name="Nome" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>CPF</label>
+                            <input type="text" name="CPF" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label>Data Nascimento</label>
+                            <input type="date" name="Data_Nascimento" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Sexo</label>
+                            <select name="Sexo" class="form-control">
+                                <option>Masculino</option>
+                                <option>Feminino</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label>CRMV</label>
+                            <input type="text" name="CRMV" class="form-control">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Email</label>
+                            <input type="email" name="Email" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label>Telefone</label>
+                            <input type="text" name="Telefone" class="form-control">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Especialidade</label>
+                            <input type="text" name="Especialidade" class="form-control">
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-success">Cadastrar</button>
+                    <button class="btn btn-secondary" style="background-color:blue;" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar -->
+<div class="modal fade" id="editarModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header" style="background-color:blue;">
+                <h5 class="modal-title" style="color:white;">Editar Funcionário</h5>
+                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form action="atualizar_funcionario.php" method="POST">
+                <div class="modal-body">
+
+                    <input type="hidden" name="ID_veterinario" id="edit_id">
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label>Nome</label>
+                            <input type="text" id="edit_nome" name="Nome" class="form-control">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>CPF</label>
+                            <input type="text" id="edit_cpf" name="CPF" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label>Data Nascimento</label>
+                            <input type="date" id="edit_data" name="Data_Nascimento" class="form-control">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>Sexo</label>
+                            <select id="edit_sexo" name="Sexo" class="form-control">
+                                <option>Masculino</option>
+                                <option>Feminino</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label>CRMV</label>
+                            <input type="text" id="edit_crmv" name="CRMV" class="form-control">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>Email</label>
+                            <input type="email" id="edit_email" name="Email" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label>Telefone</label>
+                            <input type="text" id="edit_telefone" name="Telefone" class="form-control">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>Especialidade</label>
+                            <input type="text" id="edit_especialidade" name="Especialidade" class="form-control">
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-success">Atualizar</button>
+
+                    <a id="btnExcluir" class="btn btn-danger">Excluir</a>
+
+                    <button class="btn btn-secondary" style="background-color:blue;" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("click", function (e) {
+    if (e.target.matches("[data-id]")) {
+
+        document.getElementById("edit_id").value = e.target.dataset.id;
+        document.getElementById("edit_nome").value = e.target.dataset.nome;
+        document.getElementById("edit_cpf").value = e.target.dataset.cpf;
+        document.getElementById("edit_data").value = e.target.dataset.data;
+        document.getElementById("edit_sexo").value = e.target.dataset.sexo;
+        document.getElementById("edit_crmv").value = e.target.dataset.crmv;
+        document.getElementById("edit_email").value = e.target.dataset.email;
+        document.getElementById("edit_telefone").value = e.target.dataset.telefone;
+        document.getElementById("edit_especialidade").value = e.target.dataset.especialidade;
+
+        document.getElementById("btnExcluir").href = "excluir_funcionario.php?id=" + e.target.dataset.id;
+    }
+});
+</script>
+
+<?php include 'includes/footer.php'; ?>
