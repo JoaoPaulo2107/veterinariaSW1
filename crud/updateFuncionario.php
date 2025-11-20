@@ -1,4 +1,5 @@
 <?php
+/*
 include "conexao.php";
 
 $id = $_POST['id'];
@@ -20,3 +21,5 @@ if ($conn->query($sql) === TRUE) {
 } else {
     echo "Erro ao atualizar: " . $conn->error;
 }
+*/
+?>

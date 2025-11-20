@@ -17,6 +17,12 @@ include 'includes/header_adm.php';
                 <div class="col-12">
                     <h2 class="display-6 mb-4">Funcionários</h2>
 
+                    <?php if (isset($_GET['msg'])): ?>
+                        <div class="alert alert-success text-center">
+                            <?= htmlspecialchars($_GET['msg']); ?>
+                        </div>
+                    <?php endif; ?>
+
                     <div class="table-responsive">
                         <table class="table table-striped table-hover" style="border-radius:10px; box-shadow:0 0 10px rgba(0,0,255,0.1);">
                             <thead class="table" style="background-color:blue; color:white;">
@@ -100,7 +106,7 @@ if (!$dados) {
                 <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
-            <form action="salvar_funcionario.php" method="POST">
+            <form action="crud/salvar_funcionario.php" method="POST">
                 <div class="modal-body">
 
                     <div class="row">
@@ -171,7 +177,7 @@ if (!$dados) {
                 <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
-            <form action="atualizar_funcionario.php" method="POST">
+            <form action="crud/atualizar_funcionario.php" method="POST">
                 <div class="modal-body">
 
                     <input type="hidden" name="ID_veterinario" id="edit_id">
@@ -257,7 +263,7 @@ document.addEventListener("click", function (e) {
         document.getElementById("edit_telefone").value = e.target.dataset.telefone;
         document.getElementById("edit_especialidade").value = e.target.dataset.especialidade;
 
-        document.getElementById("btnExcluir").href = "excluir_funcionario.php?id=" + e.target.dataset.id;
+        document.getElementById("btnExcluir").href = "crud/excluir_funcionario.php?id=" + e.target.dataset.id;
     }
 });
 </script>

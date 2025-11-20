@@ -1,18 +1,17 @@
 <?php
-include 'includes/header_adm.php';
 session_start();
+require_once __DIR__ . '/includes/conexao.php';
 
-// Verifica se usuário está logado
+// Verifica se o usuário está logado
 if (!isset($_SESSION['usuario_id'], $_SESSION['usuario_email'])) {
-    // não logado
-    header('Location: index.php'); // ajuste caminho para sua página de login
+    header('Location: index.php');
     exit;
 }
 
-// opcional: usuario logado. Pode usar $_SESSION['usuario_nome'] etc.
+include 'includes/header_adm.php';
 ?>
 
-<!-- Cabeçalho com imagem e frase -->
+<!-- Cabeçalho -->
 <header class="masthead">
     <div class="container px-5">
         <div class="row gx-5 align-items-center">
@@ -20,126 +19,189 @@ if (!isset($_SESSION['usuario_id'], $_SESSION['usuario_email'])) {
                 <div class="mb-5 mb-lg-0 text-center text-lg-start">
                     <h1 class="display-1 lh-1 mb-3">Bem-vinda, Gabriela!</h1>
                     <p class="lead fw-normal text-muted mb-5">
-                        Agora você está logado. Confira já suas consultas agendadas.
+                        Agora você está logada. Confira e gerencie as consultas abaixo.
                     </p>
                 </div>
             </div>
             <div class="col-lg-6">
-                <img src="assets/img/menina.png" alt="Imagem de animais de estimação" class="img-fluid">
+                <img src="assets/img/menina.png" alt="Imagem de animais" class="img-fluid">
             </div>
         </div>
     </div>
 </header>
 
 <main>
-    <section class="py-5">
-        <div class="container px-5">
-            <div class="row gx-5">
-                <div class="col-12">
-                    <h2 class="display-6 mb-4">Consultas Pendentes</h2>
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover"
-                            style="border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 255, 0.1); overflow: hidden; border-collapse: collapse;">
-                            <thead class="table" style="background-color:blue;; color: white;">
-                                <tr>
-                                    <!-- cabeçalho da tabela -->
-                                    <th scope="col">NOME CLIENTE</th>
-                                    <th scope="col">ESPÉCIE</th>
-                                    <th scope="col">PROCEDIMENTO</th>
-                                    <th scope="col">DATA</th>
-                                    <th scope="col">HORÁRIO</th>
-                                    <th scope="col">INFORMAÇÕES</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <!-- dados -->
-                                    <td>Zé Felipe</td>
-                                    <td>Cachorro</td>
-                                    <td>Consulta de Rotina</td>
-                                    <td>31/10/2025</td>
-                                    <td>10:00</td>
-                                    <td>
-                                        <button class="btn btn-warning" data-bs-toggle="modal"
-                                            data-bs-target="#infoModal">
-                                            Saiba mais
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+<section class="py-5">
+<div class="container px-5">
+<div class="row gx-5">
+<div class="col-12">
+<h2 class="display-6 mb-4">Consultas Pendentes</h2>
 
-    <section>
-        <!-- Modal com informações do Pet -->
-        <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
-            <div class="modal-dialog" style="max-width: 90%; max-height: 90vh;">
-                <div class="modal-content">
-                    <div class="modal-header" style="background-color:blue">
-                        <h5 class="modal-title" id="infoModalLabel" style="color:white;">Informações do Pet</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead class="table-light">
-                                    <tr>
-                                        <!-- cabeçalho da tabela -->
-                                        <th style="background-color:blue;" scope="col">ID</th>
-                                        <th style="background-color:blue;" scope="col">Nome Pet</th>
-                                        <th style="background-color:blue;" scope="col">Dono</th>
-                                        <th style="background-color:blue;" scope="col">Espécie</th>
-                                        <th style="background-color:blue;" scope="col">Raça</th>
-                                        <th style="background-color:blue;" scope="col">Idade</th>
-                                        <th style="background-color:blue;" scope="col">Peso</th>
-                                        <th style="background-color:blue;" scope="col">Sexo</th>
-                                        <th style="background-color:blue;" scope="col">Procedimento</th>
-                                        <th style="background-color:blue;" scope="col">Data</th>
-                                        <th style="background-color:blue;" scope="col">Horário</th>
-                                        <th style="background-color:blue;" scope="col">Observações</th>
-                                        <th style="background-color:blue;" scope="col">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <!-- dados -->
-                                        <td>1</td>
-                                        <td>Zé Felipe</td>
-                                        <td>Virginia</td>
-                                        <td>Cachorro</td>
-                                        <td>Labrador Retriever</td>
-                                        <td>5 anos</td>
-                                        <td>30kg</td>
-                                        <td>Fêmea</td>
-                                        <td>Consulta de Rotina</td>
-                                        <td>31/10/2025</td>
-                                        <td>10:00</td>
-                                        <td>Cão Bravo</td>
-                                        <td>
-                                            <!-- botão para o adm aceitar ou recusar a consulta -->
-                                            <div class="d-flex gap-1">
-                                                <button type="button" class="btn btn-success btn-sm">Aceitar</button>
-                                                <button type="button" class="btn btn-danger btn-sm">Recusar</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                                style="background-color:blue;">Fechar</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-    </section>
-</main>
+<?php if (isset($_GET['msg'])): ?>
+    <div class="alert alert-success text-center">
+        <?= htmlspecialchars($_GET['msg']); ?>
+    </div>
+<?php endif; ?>
+
 <?php
-include 'includes/footer.php';
+$sql = "SELECT 
+            c.ID_consulta, 
+            a.Nome AS NomeAnimal, 
+            d.Nome AS NomeDono,
+            d.Email, d.Telefone, d.Endereco, d.CPF,
+            a.Especie, a.Raca, a.Idade, a.Peso, a.Sexo, a.Observacao AS ObsAnimal,
+            c.Procedimento, c.Data_consulta, c.Horario, c.Observacao AS ObsConsulta, c.Status
+        FROM consulta c
+        JOIN animal a ON c.ID_Animal = a.ID_Animal
+        JOIN dono_animal d ON a.idDono_animal = d.ID_Dono_animal
+        ORDER BY c.Data_consulta ASC";
+
+$stmt = $pdo->prepare($sql);
+$stmt->execute();
+$consultas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
+<div class="table-responsive">
+<table class="table table-striped table-hover"
+    style="border-radius:10px; box-shadow:0 0 10px rgba(0,0,255,0.1); overflow:hidden;">
+    <thead class="table" style="background-color:blue; color:white;">
+        <tr>
+            <th>NOME DO DONO</th>
+            <th>ANIMAL</th>
+            <th>ESPÉCIE</th>
+            <th>DATA</th>
+            <th>HORÁRIO</th>
+            <th>STATUS</th>
+            <th>AÇÃO</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (empty($consultas)): ?>
+            <tr><td colspan="7" class="text-center">Nenhuma consulta cadastrada.</td></tr>
+        <?php else: ?>
+            <?php foreach ($consultas as $c): ?>
+                <tr>
+                    <td><?= htmlspecialchars($c['NomeDono']) ?></td>
+                    <td><?= htmlspecialchars($c['NomeAnimal']) ?></td>
+                    <td><?= htmlspecialchars($c['Especie']) ?></td>
+                    <td><?= date('d/m/Y', strtotime($c['Data_consulta'])) ?></td>
+                    <td><?= htmlspecialchars($c['Horario']) ?></td>
+                    <td>
+                        <?php if ($c['Status'] == 'Pendente'): ?>
+                            <span class="badge bg-warning text-dark">Pendente</span>
+                        <?php elseif ($c['Status'] == 'Aceita'): ?>
+                            <span class="badge bg-success">Aceita</span>
+                        <?php else: ?>
+                            <span class="badge bg-danger">Recusada</span>
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <button class="btn btn-primary btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#detalhesModal"
+                            data-id="<?= $c['ID_consulta'] ?>"
+                            data-dono="<?= htmlspecialchars($c['NomeDono']) ?>"
+                            data-animal="<?= htmlspecialchars($c['NomeAnimal']) ?>"
+                            data-especie="<?= htmlspecialchars($c['Especie']) ?>"
+                            data-raca="<?= htmlspecialchars($c['Raca']) ?>"
+                            data-idade="<?= htmlspecialchars($c['Idade']) ?>"
+                            data-peso="<?= htmlspecialchars($c['Peso']) ?>"
+                            data-sexo="<?= htmlspecialchars($c['Sexo']) ?>"
+                            data-procedimento="<?= htmlspecialchars($c['Procedimento']) ?>"
+                            data-data="<?= htmlspecialchars($c['Data_consulta']) ?>"
+                            data-horario="<?= htmlspecialchars($c['Horario']) ?>"
+                            data-obsconsulta="<?= htmlspecialchars($c['ObsConsulta']) ?>"
+                            data-obsanimal="<?= htmlspecialchars($c['ObsAnimal']) ?>"
+                            data-telefone="<?= htmlspecialchars($c['Telefone']) ?>"
+                            data-email="<?= htmlspecialchars($c['Email']) ?>"
+                            data-endereco="<?= htmlspecialchars($c['Endereco']) ?>"
+                            data-cpf="<?= htmlspecialchars($c['CPF']) ?>">
+                            Ver detalhes
+                        </button>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </tbody>
+</table>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+</main>
+
+<!-- MODAL DETALHES -->
+<div class="modal fade" id="detalhesModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header" style="background-color:blue;">
+        <h5 class="modal-title" style="color:white;">Detalhes da Consulta</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h6><b>Animal:</b> <span id="det_nome_animal"></span></h6>
+            <p><b>Espécie:</b> <span id="det_especie"></span></p>
+            <p><b>Raça:</b> <span id="det_raca"></span></p>
+            <p><b>Sexo:</b> <span id="det_sexo"></span></p>
+            <p><b>Idade:</b> <span id="det_idade"></span></p>
+            <p><b>Peso:</b> <span id="det_peso"></span> kg</p>
+            <p><b>Observações do animal:</b> <span id="det_obsanimal"></span></p>
+          </div>
+          <div class="col-md-6">
+            <h6><b>Dono:</b> <span id="det_nome_dono"></span></h6>
+            <p><b>Telefone:</b> <span id="det_telefone"></span></p>
+            <p><b>Email:</b> <span id="det_email"></span></p>
+            <p><b>CPF:</b> <span id="det_cpf"></span></p>
+            <p><b>Endereço:</b> <span id="det_endereco"></span></p>
+          </div>
+        </div>
+        <hr>
+        <p><b>Procedimento:</b> <span id="det_procedimento"></span></p>
+        <p><b>Data:</b> <span id="det_data"></span></p>
+        <p><b>Horário:</b> <span id="det_horario"></span></p>
+        <p><b>Observações da consulta:</b> <span id="det_obsconsulta"></span></p>
+      </div>
+      <div class="modal-footer">
+        <a id="btnAceitar" class="btn btn-success">Aceitar</a>
+        <a id="btnRecusar" class="btn btn-danger">Recusar</a>
+        <button class="btn btn-secondary" style="background-color:blue;" data-bs-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Script para preencher o modal -->
+<script>
+document.addEventListener("click", function(e) {
+  if (e.target.matches("[data-id]")) {
+    const b = e.target.dataset;
+    document.getElementById("det_nome_animal").textContent = b.animal;
+    document.getElementById("det_especie").textContent = b.especie;
+    document.getElementById("det_raca").textContent = b.raca;
+    document.getElementById("det_sexo").textContent = b.sexo;
+    document.getElementById("det_idade").textContent = b.idade;
+    document.getElementById("det_peso").textContent = b.peso;
+    document.getElementById("det_obsanimal").textContent = b.obsanimal;
+
+    document.getElementById("det_nome_dono").textContent = b.dono;
+    document.getElementById("det_telefone").textContent = b.telefone;
+    document.getElementById("det_email").textContent = b.email;
+    document.getElementById("det_cpf").textContent = b.cpf;
+    document.getElementById("det_endereco").textContent = b.endereco;
+
+    document.getElementById("det_procedimento").textContent = b.procedimento;
+    document.getElementById("det_data").textContent = b.data;
+    document.getElementById("det_horario").textContent = b.horario;
+    document.getElementById("det_obsconsulta").textContent = b.obsconsulta;
+
+    document.getElementById("btnAceitar").href = "crud/atualizar_status_consulta.php?id=" + b.id + "&acao=aceitar";
+    document.getElementById("btnRecusar").href = "crud/atualizar_status_consulta.php?id=" + b.id + "&acao=recusar";
+  }
+});
+</script>
+
+<?php include 'includes/footer.php'; ?>

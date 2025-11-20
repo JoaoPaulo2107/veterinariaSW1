@@ -1,4 +1,5 @@
 <?php
+/*
 include "conexao.php";
 
 $id = $_GET['id'];
@@ -27,3 +28,5 @@ $dados = $result->fetch_assoc();
 
     <button type="submit">Salvar</button>
 </form>
+*/
+?>
