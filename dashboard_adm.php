@@ -87,13 +87,20 @@ $consultas = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <td><?= date('d/m/Y', strtotime($c['Data_consulta'])) ?></td>
                     <td><?= htmlspecialchars($c['Horario']) ?></td>
                     <td>
-                        <?php if ($c['Status'] == 'Pendente'): ?>
-                            <span class="badge bg-warning text-dark">Pendente</span>
-                        <?php elseif ($c['Status'] == 'Aceita'): ?>
-                            <span class="badge bg-success">Aceita</span>
-                        <?php else: ?>
-                            <span class="badge bg-danger">Recusada</span>
-                        <?php endif; ?>
+                        <?php
+                        $status = strtolower(trim($c['Status']));
+                        if ($status === 'pendente') {
+                            echo '<span class="badge bg-warning text-dark">Pendente</span>';
+                        } elseif ($status === 'aceita') {
+                            echo '<span class="badge bg-success">Aceita</span>';
+                        } elseif ($status === 'cancelada') {
+                            echo '<span class="badge bg-danger">Cancelada</span>';
+                        } elseif ($status === 'recusada') {
+                            echo '<span class="badge bg-secondary">Recusada</span>';
+                        } else {
+                            echo '<span class="badge bg-dark">Desconhecido (' . htmlspecialchars($c['Status']) . ')</span>';
+                        }
+                        ?>
                     </td>
                     <td>
                         <button class="btn btn-primary btn-sm"

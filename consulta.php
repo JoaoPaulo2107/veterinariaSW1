@@ -1,116 +1,288 @@
 <?php
 include 'includes/header_cliente.php';
 session_start();
+include 'includes/conexao.php';
 
-// Verifica se usuário está logado
+// Verifica login
 if (!isset($_SESSION['usuario_id'], $_SESSION['usuario_email'])) {
-    // não logado
-    header('Location: index.php'); // ajuste caminho para sua página de login
+    header('Location: index.php');
     exit;
 }
-
-// opcional: usuario logado. Pode usar $_SESSION['usuario_nome'] etc.
 ?>
 
-<body>
-    <main>
-            <div class="container_consulta">
-                <h1>Marque a Consulta do seu Pet</h1>
-                <form action="inserir.php" method="POST">
-                    <!-- Escolha do Pet (Pegar os Cadastrados, as informações abaixo estão desabilitadas pois serão preenchidas quando o pet for selecionado)-->
-                    <div class="mb-3">
-                        <select class="form-control" name="especie" required>
-                            <option value="" disabled selected>Selecione o Pet</option>
-                            <option value="pet1">Rex</option>
-                            <option value="pet2">Luna</option>
-                            <option value="pet3">Akira</option>
-                        </select>
-                    </div>
-    
-                    <!-- Espécie -->
-                    <div class="mb-3">
-                        <select class="form-control" name="especie" disabled>
-                            <option value="" disabled selected>Espécie do pet</option>
-                            <option value="Cachorro">Cachorro</option>
-                            <option value="Gato">Gato</option>
-                            <option value="Passaro">Pássaro/Ave</option>
-                            <option value="Coelho">Coelho</option>
-                            <option value="Rato">Hamster/Rato</option>
-                            <option value="Outro">Outro</option>
-                        </select>
-                    </div>
+<!-- Cabeçalho -->
+<header class="masthead">
+  <div class="container px-5">
+    <div class="row gx-5 align-items-center">
+      <div class="col-lg-6">
+        <div class="mb-5 mb-lg-0 text-center text-lg-start">
+          <h1 class="display-1 lh-1 mb-3">
+            Bem-vindo(a), <?= htmlspecialchars($_SESSION['usuario_nome']) ?>!
+          </h1>
+          <p class="lead fw-normal text-muted mb-5">
+            Aqui você pode visualizar, marcar, remarcar ou cancelar suas consultas.
+          </p>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <img src="assets/img/loginpet.png" alt="Imagem de animais" class="img-fluid">
+      </div>
+    </div>
+  </div>
+</header>
 
-                    <!-- Raça -->
-                    <div class="mb-3">
-                        <input type="text" class="form-control" name="raca" placeholder="Raça do pet" disabled>
-                    </div>
+<main>
+  <section class="py-5">
+    <div class="container px-5">
+      <div class="row gx-5">
+        <div class="col-12">
 
-                    <!-- Idade -->
-                    <div class="mb-3">
-                        <input type="text" class="form-control" name="idade" placeholder="Idade do pet" disabled>
-                    </div>
+          <h2 class="display-6 mb-4">Minhas Consultas</h2>
 
-                    <!-- Peso -->
-                    <div class="mb-3">
-                        <input type="text" class="form-control" name="peso" placeholder="Peso" disabled>
-                    </div>
+          <!-- Botão para abrir o modal de nova consulta -->
+          <div class="text-center mb-4">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#novaConsultaModal">
+              + Marcar Nova Consulta
+            </button>
+          </div>
 
-                    <!-- Sexo -->
-                    <div class="mb-3">
-                        <select class="form-control" name="sexo" disabled>
-                            <option value="" disabled selected>Sexo do pet</option>
-                            <option value="Macho">Macho</option>
-                            <option value="Fêmea">Fêmea</option>
-                        </select>
-                    </div>
+          <div class="table-responsive">
+            <table class="table table-striped table-hover"
+              style="border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,255,0.1); overflow: hidden;">
+              <thead class="table" style="background-color: blue;">
+                <tr>
+                  <th style="color:#fff;">Data</th>
+                  <th style="color:#fff;">Horário</th>
+                  <th style="color:#fff;">Procedimento</th>
+                  <th style="color:#fff;">Pet</th>
+                  <th style="color:#fff;">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php
+                $idUsuario = $_SESSION['usuario_id'];
 
-                    <!-- Procedimento -->
-                    <div class="mb-3">
-                        <select class="form-control" name="procedimento" required>
-                            <option value="" disabled selected>Selecione o procedimento</option>
-                            <option value="Vacinação">Vacinação</option>
-                            <option value="Consulta geral">Consulta geral</option>
-                            <option value="Tosse ou resfriado">Tosse ou resfriado</option>
-                            <option value="Retorno">Retorno</option>
-                            <option value="Banho">Banho e Tosa</option>
-                            <option value="Exame">Exame</option>
-                            <option value="Outro">Outro</option>
-                        </select>
-                    </div>
+                $sql = "
+                  SELECT 
+                    c.ID_consulta,
+                    c.Data_consulta AS data,
+                    c.Horario,
+                    c.Procedimento,
+                    c.Status,
+                    a.Nome AS nome_pet,
+                    c.motivo_cancelamento
+                  FROM Consulta c
+                  INNER JOIN Animal a ON a.ID_Animal = c.ID_Animal
+                  WHERE a.idDono_animal = :id
+                  ORDER BY c.Data_consulta DESC
+                ";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([':id' => $idUsuario]);
+                $consultas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-                    <!-- Data -->
-                    <div class="mb-3">
-                        <input type="date" class="form-control" name="data" required>
-                    </div>
+                if (empty($consultas)) {
+                    echo '<tr><td colspan="5" class="text-center text-muted">Nenhuma consulta encontrada.</td></tr>';
+                } else {
+                    foreach ($consultas as $row) {
+                        echo '<tr>';
+                        echo '<td>' . date("d/m/Y", strtotime($row["data"])) . '</td>';
+                        echo '<td>' . htmlspecialchars($row["Horario"]) . '</td>';
+                        echo '<td>' . htmlspecialchars($row["Procedimento"]) . '</td>';
+                        echo '<td>' . htmlspecialchars($row["nome_pet"]) . '</td>';
+                        $status = empty($row["motivo_cancelamento"]) ? htmlspecialchars($row["Status"]) : "Cancelada";
+                        echo '<td>' . $status . '</td>';
+                        echo '</tr>';
+                    }
+                }
+                ?>
+              </tbody>
+            </table>
+          </div>
 
-                    <!-- Horário -->
-                    <div class="mb-3">
-                        <select class="form-control" name="procedimento" required>
-                            <option value="" disabled selected>Selecione o horário</option>
-                            <option value="09">09:00</option>
-                            <option value="10">10:00</option>
-                            <option value="11">11:00</option>
-                            <option value="13">12:00</option>
-                            <option value="14">14:00</option>
-                            <option value="15">15:00</option>
-                            <option value="16">16:00</option>
-                            <option value="17">17:00</option>
-                            <option value="18">18:00</option>
-                        </select>
-                    </div>
+          <div class="text-center mt-4">
+            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#consultaModal">
+              Remarcar ou Cancelar Consulta
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-                    <!-- Campo Opcional -->
-                    <div class="mb-3">
-                        <input type="text" class="form-control" name="observacao"
-                            placeholder="Observação (campo não obrigatório)">
-                    </div>
+    <!-- MODAL DE MARCAR NOVA CONSULTA -->
+    <div class="modal fade" id="novaConsultaModal" tabindex="-1" aria-labelledby="novaConsultaModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header" style="background-color: blue;">
+            <h5 class="modal-title text-white">Marcar Nova Consulta</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form action="crud/inserir_consulta.php" method="POST">
+              <?php
+              $usuario_id = $_SESSION['usuario_id'];
+              $sqlPets = "SELECT * FROM animal WHERE idDono_animal = :id";
+              $stmtPets = $pdo->prepare($sqlPets);
+              $stmtPets->execute([':id' => $usuario_id]);
+              $pets = $stmtPets->fetchAll(PDO::FETCH_ASSOC);
+              ?>
+              
+              <div class="mb-3">
+                <label class="form-label">Selecione o Pet</label>
+                <select name="ID_Animal" class="form-control" required>
+                  <option value="" disabled selected>Selecione</option>
+                  <?php foreach ($pets as $p): ?>
+                    <option value="<?= $p['ID_Animal'] ?>"><?= htmlspecialchars($p['Nome']) ?></option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
 
-                    <!-- Botões -->
-                    <button type="submit" class="btn btn-primary">Cadastrar</button>
-                    <a href="dashboard_cliente.php" type="button" class="btn btn-warning">Voltar</a>
-                </form>
+              <div class="mb-3">
+                <label class="form-label">Procedimento</label>
+                <select name="procedimento" class="form-control" required>
+                  <option value="" disabled selected>Selecione</option>
+                  <option value="Vacinação">Vacinação</option>
+                  <option value="Consulta geral">Consulta geral</option>
+                  <option value="Retorno">Retorno</option>
+                  <option value="Banho e tosa">Banho e tosa</option>
+                  <option value="Exame">Exame</option>
+                </select>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Data</label>
+                  <input type="date" name="data" class="form-control" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Horário</label>
+                  <select name="horario" class="form-control" required>
+                    <option value="" disabled selected>Selecione</option>
+                    <option value="08:00">08:00</option>
+                    <option value="09:00">09:00</option>
+                    <option value="10:00">10:00</option>
+                    <option value="11:00">11:00</option>
+                    <option value="14:00">14:00</option>
+                    <option value="15:00">15:00</option>
+                    <option value="16:00">16:00</option>
+                    <option value="17:00">17:00</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Observação (opcional)</label>
+                <textarea name="observacao" class="form-control" rows="2"></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary">Cadastrar Consulta</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DE REMARCAR/CANCELAR -->
+    <div class="modal fade" id="consultaModal" tabindex="-1" aria-labelledby="consultaModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header" style="background-color: blue;">
+            <h5 class="modal-title text-white" id="consultaModalLabel">Gerenciar Consulta</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+
+            <div class="mb-4">
+              <label for="consultaSelecionada" class="form-label fw-bold">Selecione a consulta:</label>
+              <select class="form-control" id="consultaSelecionada" required>
+                <option value="" disabled selected>Selecione uma consulta</option>
+                <?php
+                $sqlConsultasModal = "
+                  SELECT 
+                    c.ID_consulta,
+                    c.Data_consulta,
+                    c.Horario,
+                    c.Procedimento,
+                    a.Nome AS nome_pet,
+                    c.Status
+                  FROM Consulta c
+                  INNER JOIN Animal a ON a.ID_Animal = c.ID_Animal
+                  WHERE a.idDono_animal = :id
+                  ORDER BY c.Data_consulta ASC
+                ";
+                $stmtModal = $pdo->prepare($sqlConsultasModal);
+                $stmtModal->execute([':id' => $idUsuario]);
+                $consultasModal = $stmtModal->fetchAll(PDO::FETCH_ASSOC);
+
+                foreach ($consultasModal as $c) {
+                    echo '<option value="' . $c["ID_consulta"] . '">';
+                    echo "Pet: " . htmlspecialchars($c["nome_pet"]) . " | " . date("d/m/Y", strtotime($c["Data_consulta"])) . " às " . $c["Horario"] . " - " . $c["Procedimento"];
+                    echo '</option>';
+                }
+                ?>
+              </select>
             </div>
-    </main>
-<?php
- include 'includes/footer.php';
-?>
+
+            <div class="card mb-3">
+              <div class="card-body">
+                <h6 class="card-title">Reagendar Consulta</h6>
+                <form action="crud/reagendar_consulta.php" method="POST" id="formReagendar">
+                  <input type="hidden" name="id_consulta" id="idConsultaReagendar">
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label for="novaData" class="form-label">Nova Data</label>
+                      <input type="date" class="form-control" id="novaData" name="nova_data" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="novoHorario" class="form-label">Novo Horário</label>
+                      <select class="form-control" id="novoHorario" name="novo_horario" required>
+                        <option value="" disabled selected>Selecione</option>
+                        <option value="08:00">08:00</option>
+                        <option value="09:00">09:00</option>
+                        <option value="10:00">10:00</option>
+                        <option value="11:00">11:00</option>
+                        <option value="14:00">14:00</option>
+                        <option value="15:00">15:00</option>
+                        <option value="16:00">16:00</option>
+                        <option value="17:00">17:00</option>
+                      </select>
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn-warning">Confirmar Reagendamento</button>
+                </form>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-body">
+                <h6 class="card-title text-danger">Cancelar Consulta</h6>
+                <form action="crud/cancelar_consulta.php" method="POST" id="formCancelar">
+                  <input type="hidden" name="id_consulta" id="idConsultaCancelar">
+                  <div class="mb-3">
+                    <label for="motivoCancelar" class="form-label">Motivo do Cancelamento</label>
+                    <textarea class="form-control" id="motivoCancelar" name="motivo" rows="2" required></textarea>
+                  </div>
+                  <button type="submit" class="btn btn-danger">Confirmar Cancelamento</button>
+                </form>
+              </div>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="background-color: blue;">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.getElementById("consultaSelecionada").addEventListener("change", function() {
+        let id = this.value;
+        document.getElementById("idConsultaReagendar").value = id;
+        document.getElementById("idConsultaCancelar").value = id;
+      });
+    </script>
+
+  </section>
+</main>
+
+<?php include 'includes/footer.php'; ?>

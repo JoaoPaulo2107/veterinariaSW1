@@ -1,6 +1,8 @@
 <?php
     include 'includes/header_cliente.php';     
     session_start();
+    include 'includes/conexao.php';
+
 
 // Verifica se usuário está logado
 if (!isset($_SESSION['usuario_id'], $_SESSION['usuario_email'])) {
@@ -54,31 +56,54 @@ if (!isset($_SESSION['usuario_id'], $_SESSION['usuario_email'])) {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <!-- dados -->
-                                    <td>15/03/2024</td>
-                                    <td>10:00</td>
-                                    <td>Consulta de Rotina</td>
-                                    <td>Luna</td>
-                                    <td>Agendado</td>
-                                </tr>
-                                <tr>
-                                    <!-- dados -->
-                                    <td>20/09/2025</td>
-                                    <td>10:00</td>
-                                    <td>Vacinação Anual</td>
-                                    <td>Rex</td>
-                                    <td>Finalizado</td>
-                                </tr>
-                                <tr>
-                                    <!-- dados -->
-                                    <td>25/03/2025</td>
-                                    <td>16:00</td>
-                                    <td>Banho e Tosa</td>
-                                    <td>Thor</td>
-                                    <td>Finalizado</td>
-                                </tr>
-                            </tbody>
+                                <?php
+                                include 'includes/conexao.php';
+
+                                $idUsuario = $_SESSION['usuario_id'];
+
+                               $sql = "
+                                    SELECT 
+                                        c.ID_consulta,
+                                        c.Data_consulta AS data,
+                                        c.Horario,
+                                        c.Procedimento,
+                                        c.Status,
+                                        a.Nome AS nome_pet,
+                                        c.motivo_cancelamento
+                                    FROM Consulta c
+                                    INNER JOIN Animal a ON a.ID_Animal = c.ID_Animal
+                                    WHERE a.idDono_animal = :id
+                                    ORDER BY c.Data_consulta DESC
+                                ";
+
+
+                                $stmt = $pdo->prepare($sql);
+                                $stmt->execute([':id' => $idUsuario]);
+                                $consultas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+                               if (empty($consultas)) {
+                                    echo '<tr><td colspan="5" class="text-center text-muted">Nenhuma consulta encontrada.</td></tr>';
+                                } else {
+                                    foreach ($consultas as $row) {
+                                        echo '<tr>';
+                                        echo '<td>' . date("d/m/Y", strtotime($row["data"])) . '</td>';
+                                        echo '<td>' . htmlspecialchars($row["Horario"]) . '</td>';
+                                        echo '<td>' . htmlspecialchars($row["Procedimento"]) . '</td>';
+                                        echo '<td>' . htmlspecialchars($row["nome_pet"]) . '</td>';
+
+                                        // Se existe motivo_cancelamento → Cancelada, senão → Agendada
+                                        $status = empty($row["motivo_cancelamento"]) ? "Agendada" : "Cancelada";
+
+                                        echo '<td>' . htmlspecialchars($status) . '</td>';
+                                        echo '</tr>';
+                                    }
+                                }
+
+                                ?>
+
+                                </tbody>
+
                         </table>
                     </div>
 
@@ -105,12 +130,34 @@ if (!isset($_SESSION['usuario_id'], $_SESSION['usuario_email'])) {
                         <!-- Informações da Consulta, aqui seria as consultas que ainda vão acontecer do cliente -->
                         <div class="mb-4">
                             <div class="mb-3">
-                                <select class="form-control" name="infoconsultas" required>
-                                    <option value="" disabled selected>Selecione a data da Consulta</option>
-                                    <option value="01">Dia 15/03/2025 ás 10:00</option>
-                                    <option value="02">Dia 16/03/2025 ás 10:00</option>
-                                    <option value="03">Dia 17/03/2025 ás 10:00</option>
+                                <select class="form-control" name="infoconsultas" id="consultaSelecionada" required>
+                                    <option value="" disabled selected>Selecione a consulta</option>
+
+                                    <?php
+                                    $sqlConsultasModal = "
+                                        SELECT 
+                                            c.ID_consulta,
+                                            c.Data_consulta,
+                                            c.Horario
+                                        FROM Consulta c
+                                        INNER JOIN Animal a ON a.ID_Animal = c.ID_Animal
+                                        WHERE a.idDono_animal = :id
+                                        AND c.Status = 'agendada'
+                                        ORDER BY c.Data_consulta ASC
+                                    ";
+
+                                    $stmtModal = $pdo->prepare($sqlConsultasModal);
+                                    $stmtModal->execute([':id' => $idUsuario]);
+                                    $consultasModal = $stmtModal->fetchAll(PDO::FETCH_ASSOC);
+
+                                    foreach ($consultasModal as $c) {
+                                        echo '<option value="' . $c["ID_consulta"] . '">';
+                                        echo "Dia " . date("d/m/Y", strtotime($c["Data_consulta"])) . " às " . $c["Horario"];
+                                        echo '</option>';
+                                    }
+                                    ?>
                                 </select>
+
                             </div>
 
                         </div>
@@ -123,8 +170,13 @@ if (!isset($_SESSION['usuario_id'], $_SESSION['usuario_email'])) {
                             <div class="card mb-3">
                                 <div class="card-body">
                                     <h6 class="card-title">Reagendar Consulta</h6>
-                                    <form action="reagendar_consulta.php" method="POST" class="mt-3">
-                                        <div class="row">
+                                        <form action="reagendar_consulta.php" method="POST" class="mt-3">
+
+                                            <!-- CAMPO IMPORTANTE!!! -->
+                                             <input type="hidden" name="id_consulta" id="idConsultaReagendar">
+
+                                            <div class="row">
+
                                             <div class="col-md-6 mb-3">
                                                 <!-- input de data para poder agendar uma nova -->
                                                 <label for="novaData" class="form-label">Nova Data</label>
@@ -152,21 +204,29 @@ if (!isset($_SESSION['usuario_id'], $_SESSION['usuario_email'])) {
                                 </div>
                             </div>
 
-                            <!-- Opção 2: Cancelar Consulta -->
+                          <!-- Opção 2: Cancelar Consulta -->
                             <div class="card">
                                 <div class="card-body">
                                     <h6 class="card-title text-danger">Cancelar Consulta</h6>
+
                                     <form action="cancelar_consulta.php" method="POST" class="mt-3">
+
+                                        <!-- ⬇⬇⬇ ESTE É O CAMPO QUE FALTAVA ⬇⬇⬇ -->
+                                        <input type="hidden" name="id_consulta" id="idConsultaCancelar">
+
                                         <div class="mb-3">
-                                            <label for="motivoCancelar" class="form-label">Motivo do
-                                                Cancelamento</label>
+                                            <label for="motivoCancelar" class="form-label">Motivo do Cancelamento</label>
                                             <textarea class="form-control" id="motivoCancelar" name="motivo" rows="2"
-                                                placeholder="Informe o motivo do cancelamento..." required></textarea>
+                                                placeholder="Informe o motivo..." required></textarea>
                                         </div>
+
                                         <button type="submit" class="btn btn-danger">Confirmar Cancelamento</button>
+
                                     </form>
+
                                 </div>
                             </div>
+
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -176,6 +236,15 @@ if (!isset($_SESSION['usuario_id'], $_SESSION['usuario_email'])) {
                 </div>
             </div>
         </div>
+        <script>
+            document.getElementById("consultaSelecionada").addEventListener("change", function() {
+                let id = this.value;
+
+                document.getElementById("idConsultaReagendar").value = id;
+                document.getElementById("idConsultaCancelar").value = id;
+            });
+</script>
+
     </section>
 </main>
 <?php
