@@ -2,9 +2,9 @@
 session_start();
 require_once __DIR__ . '/includes/conexao.php';
 
-// Verifica se o usuário está logado
+// Verifica login
 if (!isset($_SESSION['usuario_id'], $_SESSION['usuario_email'])) {
-    header('Location: index.php');
+    header('Location: ../index.php');
     exit;
 }
 
@@ -47,13 +47,13 @@ include 'includes/header_adm.php';
 $sql = "SELECT 
             c.ID_consulta, 
             a.Nome AS NomeAnimal, 
-            d.Nome AS NomeDono,
-            d.Email, d.Telefone, d.Endereco, d.CPF,
+            u.Nome AS NomeDono,
+            u.Email, u.Telefone, u.CPF,
             a.Especie, a.Raca, a.Idade, a.Peso, a.Sexo, a.Observacao AS ObsAnimal,
             c.Procedimento, c.Data_consulta, c.Horario, c.Observacao AS ObsConsulta, c.Status
         FROM consulta c
         JOIN animal a ON c.ID_Animal = a.ID_Animal
-        JOIN dono_animal d ON a.idDono_animal = d.ID_Dono_animal
+        JOIN usuario u ON a.idDono_animal = u.ID_usuario
         ORDER BY c.Data_consulta ASC";
 
 $stmt = $pdo->prepare($sql);
@@ -87,20 +87,17 @@ $consultas = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <td><?= date('d/m/Y', strtotime($c['Data_consulta'])) ?></td>
                     <td><?= htmlspecialchars($c['Horario']) ?></td>
                     <td>
-                        <?php
-                        $status = strtolower(trim($c['Status']));
-                        if ($status === 'pendente') {
-                            echo '<span class="badge bg-warning text-dark">Pendente</span>';
-                        } elseif ($status === 'aceita') {
-                            echo '<span class="badge bg-success">Aceita</span>';
-                        } elseif ($status === 'cancelada') {
-                            echo '<span class="badge bg-danger">Cancelada</span>';
-                        } elseif ($status === 'recusada') {
-                            echo '<span class="badge bg-secondary">Recusada</span>';
-                        } else {
-                            echo '<span class="badge bg-dark">Desconhecido (' . htmlspecialchars($c['Status']) . ')</span>';
-                        }
-                        ?>
+                        <?php if ($c['Status'] == 'Pendente'): ?>
+                            <span class="badge bg-warning text-dark">Pendente</span>
+                        <?php elseif ($c['Status'] == 'Aceita'): ?>
+                            <span class="badge bg-success">Aceita</span>
+                        <?php elseif ($c['Status'] == 'Recusada'): ?>
+                            <span class="badge bg-danger">Recusada</span>
+                        <?php elseif ($c['Status'] == 'Cancelada'): ?>
+                            <span class="badge bg-secondary">Cancelada</span>
+                        <?php else: ?>
+                            <span class="badge bg-dark">Indefinido</span>
+                        <?php endif; ?>
                     </td>
                     <td>
                         <button class="btn btn-primary btn-sm"
@@ -121,7 +118,6 @@ $consultas = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             data-obsanimal="<?= htmlspecialchars($c['ObsAnimal']) ?>"
                             data-telefone="<?= htmlspecialchars($c['Telefone']) ?>"
                             data-email="<?= htmlspecialchars($c['Email']) ?>"
-                            data-endereco="<?= htmlspecialchars($c['Endereco']) ?>"
                             data-cpf="<?= htmlspecialchars($c['CPF']) ?>">
                             Ver detalhes
                         </button>
@@ -163,7 +159,6 @@ $consultas = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <p><b>Telefone:</b> <span id="det_telefone"></span></p>
             <p><b>Email:</b> <span id="det_email"></span></p>
             <p><b>CPF:</b> <span id="det_cpf"></span></p>
-            <p><b>Endereço:</b> <span id="det_endereco"></span></p>
           </div>
         </div>
         <hr>
@@ -198,7 +193,6 @@ document.addEventListener("click", function(e) {
     document.getElementById("det_telefone").textContent = b.telefone;
     document.getElementById("det_email").textContent = b.email;
     document.getElementById("det_cpf").textContent = b.cpf;
-    document.getElementById("det_endereco").textContent = b.endereco;
 
     document.getElementById("det_procedimento").textContent = b.procedimento;
     document.getElementById("det_data").textContent = b.data;
